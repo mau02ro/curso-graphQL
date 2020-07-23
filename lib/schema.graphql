@@ -1,15 +1,40 @@
+"valida los tipos de nivel"
+enum Level {
+  principiante
+  intermedio
+  avanzado
+}
+
+union GlobalSearch = Course | Student | Monitor
+
 type Course {
   _id: ID!
   title: String!
   teacher: String
   description: String!
-  topic: String
+  topic: String @deprecated
   people: [Student]
+  level: Level
 }
-type Student {
+
+interface Person {
   _id: ID!
   name: String!
   email: String!
+}
+
+type Student implements Person {
+  _id: ID!
+  name: String!
+  email: String!
+  avatar: String
+}
+
+type Monitor implements Person {
+  _id: ID!
+  name: String!
+  email: String!
+  phone: String
 }
 
 type Query {
@@ -18,9 +43,11 @@ type Query {
   # Devuelve un curso
   getCourse(id: ID!): Course
   # Devuelve todos los estudiantes
-  getStudents: [Student]
+  getPeople: [Person]
   # Devuelve un estudiante
-  getStudent(id: ID!): Student
+  getPerson(id: ID!): Person
+  "Busqueda global"
+  searchItems(keyword: String!): [GlobalSearch]
 }
 
 # -------------------
@@ -33,6 +60,7 @@ input CourseInput {
   teacher: String
   description: String!
   topic: String
+  level: Level
 }
 input CourseEditInput {
   title: String
@@ -40,14 +68,18 @@ input CourseEditInput {
   description: String
   topic: String
 }
-# students
-input StudentInput {
+# Persons
+input PersonInput {
   name: String!
   email: String!
+  avatar: String
+  phone: String
 }
-input StudentEditInput {
+input PersonEditInput {
   name: String
   email: String
+  avatar: String
+  phone: String
 }
 
 type Mutation {
@@ -58,11 +90,11 @@ type Mutation {
   "Eliminar un curo"
   deleteCourse(_id: ID!): String
   # Crea un estudiante
-  createStudent(input: StudentInput!): Student
+  createPerson(input: PersonInput!): Person
   # Edita un estudiante
-  editStudent(_id: ID!, input: StudentEditInput): Student
+  editPerson(_id: ID!, input: PersonEditInput): Person
   "Eliminar un estudiante"
-  deleteStudent(_id: ID!): String
+  deletePerson(_id: ID!): String
   "Agrega una persona aun curso"
   addPeople(courseID: ID!, personID: ID!): Course
 }
